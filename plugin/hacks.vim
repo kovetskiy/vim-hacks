@@ -1,8 +1,8 @@
-let g:hacks_directory = get(g:, "hacks_directory", glob("~/.vim/hacks"))
+let g:hacks_directories = get(g:, "hacks_directories", glob("~/.vim/hacks"))
 let g:hacks_on = get(g:, "hacks_on", ["VimEnter *"])
 
-func! s:load_hack(full_path)
-    let l:path = strpart(a:full_path, strlen(g:hacks_directory))
+func! s:load_hack(hack_directory, full_path)
+    let l:path = strpart(a:full_path, strlen(a:hack_directory))
     while l:path[0] == "/"
         let l:path = strpart(l:path, 1)
     endwhile
@@ -14,9 +14,20 @@ func! s:load_hack(full_path)
 endfunc!
 
 func! s:load_hacks()
-    let l:files = split(globpath(g:hacks_directory, "**/*.vim"), "[\r\n]")
+    if type(g:hacks_directories) == type([])
+        for path in g:hacks_directories
+            call s:load_hacks_directory(path)
+        endfor
+    else
+        call s:load_hacks_directory(g:hacks_directories)
+    endif
+endfunc!
+
+
+func! s:load_hacks_directory(path)
+    let l:files = split(globpath(a:path, "**/*.vim"), "[\r\n]")
     for l:file in l:files
-        call s:load_hack(l:file)
+        call s:load_hack(a:path, l:file)
     endfor
 endfunc!
 
